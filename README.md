@@ -8,8 +8,12 @@ This can be added as a git custom command if you add the script to your path. Th
 ## Options
 ```
 -h | --help  show help message and command line options
--r | --repo  name or link to repository. This can be in the form of 'user/repository-name', 'https://github.com/user/repository-name', 'ssh://guthub.com/user/repository-name'
+-r | --repo  name or link to repository. This can be in the 
+            form of 'user/repository-name', 
+            'https://github.com/user/repository-name', 
+            'ssh://guthub.com/user/repository-name'
 -d | --dir   directory that you want to create the files in (default: /tmp)
+-df | --diff-files  show the files from each fork that are different from the upstream files
 ```
 ## Sample Output
 ```
