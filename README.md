@@ -2,6 +2,8 @@
 Show all the forks for an upstream repository that do not have the same commit id as the upstream repository. The script only downloads the ```.git``` files enough to do comparisons on the repos themselves. IE: It will only do a ```git fetch``` on the repository and it's forks that are listed on the github website.
 This can be added as a git custom command if you add the script to your path. Then you can do ```git diff-forks -r name|link-to-github-repo``` instead of just ```./git-diff-forks.py```
 
+Right now the script only compares each ```master``` branch of the upstream and its forks. 
+
 ## Usage
 ```$ ./git-diff-forks.py -r https://github/user/repository(.git)?```
 
