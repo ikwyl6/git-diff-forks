@@ -10,12 +10,18 @@ Right now the script only compares each ```master``` branch of the upstream and 
 ## Options
 ```
 -h | --help  show help message and command line options
--r | --repo  name or link to repository. This can be in the 
-            form of 'user/repository-name', 
+-r | --repo  name or link to repository. This can be in the form of 'user/repository-name', 
             'https://github.com/user/repository-name', 
             'ssh://guthub.com/user/repository-name'
 -d | --dir   directory that you want to create the files in (default: /tmp)
--df | --diff-files  show the files from each fork that are different from the upstream files
+```
+
+Options to be implemented:
+```
+-df | --diff-files      show the files from each fork that are different from the upstream files
+-dr | --delete-remotes  delete the .git files after completion of script 
+                        (default: /tmp/repo_user-repo_name/)
+-v  | --verbose         verbose output
 ```
 ## Sample Output
 ```
