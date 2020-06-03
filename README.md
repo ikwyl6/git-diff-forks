@@ -5,7 +5,7 @@ This can be added as a git custom command if you add the script to your path. Th
 Right now the script only compares each ```master``` branch of the upstream and its forks. 
 
 ## Usage
-```$ ./git-diff-forks.py -r https://github/user/repository(.git)?```
+```$ ./git-diff-forks.py -r https://github.com/user/repository(.git)?```
 
 ## Options
 ```
