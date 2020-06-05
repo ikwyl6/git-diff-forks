@@ -53,12 +53,6 @@ cla.add_argument('-v', '--verbose', \
 #logging.basicConfig(level=args.loglevel)
 clargs = cla.parse_args()
 
-def branch_exists(branch_name):
-    cp = run(["git", "branch", "-v"], capture_output=True, text=True)
-    m = re.search(branch_name, cp.stdout)
-    if (m):
-        return True
-
 
 # Parse the user and repo name first
 if (not clargs.repo):
