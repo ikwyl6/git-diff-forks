@@ -27,12 +27,11 @@ cla.add_argument('-r', '--repo', \
         help='address or short form address of github repo')
 cla.add_argument('-d', '--dir', default='/tmp', \
         help='target dir that is used for all work')
-cla.add_argument('-n', '--newdir', \
-        help='Create a new directory for comparing the upstream repo and \
-        all forks')
+cla.add_argument('-b', '--branch', \
+        help='Specify a branch to show diff (instead of \'master\')')
+
 cla.add_argument('-df', '--diff-files', \
-        help='Show only the files that different from the fork and upstream \
-        repo')
+        help='Show a list of files that are different from upstream files')
 cla.add_argument('-dr', '--delete-remotes', \
         help='Delete all remotes created from this diff comparisoni after \
         script is completed')
