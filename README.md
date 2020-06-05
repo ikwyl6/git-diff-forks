@@ -22,7 +22,7 @@ $ ./git-diff-forks.py -r user/repository
 
 Options to be implemented:
 ```
--b  | --branch	Specify a different branch to use instead of 'master' branch
+-b  | --branch	            Specify a different branch to use instead of 'master' branch
 -df | --diff-files      show the files from each fork that are different from the upstream files
 -dr | --delete-remotes  delete the .git files after completion of script 
                         (default: /tmp/repo_user-repo_name/)
