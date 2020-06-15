@@ -29,11 +29,11 @@ cla.add_argument('-d', '--dir', default='/tmp', \
         help='target dir that is used for all work')
 cla.add_argument('-b', '--branch', \
         help='Specify a branch to show diff (instead of \'master\')')
-
+# List all branches weather they are different or not..
 cla.add_argument('-df', '--diff-files', \
         help='Show a list of files that are different from upstream files')
 cla.add_argument('-dr', '--delete-remotes', \
-        help='Delete all remotes created from this diff comparisoni after \
+        help='Delete all remotes created from this diff comparison after \
         script is completed')
 cla.add_argument('-v', '--verbose', \
         help='Show verbose information/debug')
