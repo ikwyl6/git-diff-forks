@@ -22,7 +22,7 @@ git_diff_cmd=["git for-each-ref --sort=-committerdate",
 
 ## COMMAND LINE ARGS ##
 cla = argparse.ArgumentParser(prog='git-diff-forks', \
-        description='Show the diffs of all forks of a git repo project')
+        description='Show the diffs of all forks of a github repo project')
 cla.add_argument('-r', '--repo', \
         help='address or short form address of github repo')
 cla.add_argument('-d', '--dir', default='/tmp', \
