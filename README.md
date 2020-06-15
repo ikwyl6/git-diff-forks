@@ -17,7 +17,7 @@ $ ./git-diff-forks.py -r user/repository
 -r | --repo  name or link to repository. This can be in the form of 'user/repository-name', 
             'https://github.com/user/repository-name', 
             'ssh://guthub.com/user/repository-name'
--d | --dir   directory that you want to create the files in (default: /tmp)
+-d | --dir   directory that you want to create the ```.git``` files in (default: /tmp)
 ```
 
 Options to be implemented:
