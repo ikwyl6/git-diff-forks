@@ -63,6 +63,36 @@ def ahead_behind(fork):
     #print("ab: " + ab)
     return ab.replace("\n", "")
 
+# Take the github_api_forks url and return fork_list
+# which is a list of all the fork names
+def get_forks(github_api_forks):
+    response = requests.get(github_api_forks)
+    if response.status_code == 404:
+        print("Server returned 404. Exiting.")
+        response.raise_for_status()
+        exit()
+    elif (response.ok):
+        for fork in response.json():
+            #print("fork url: " + fork['clone_url'])
+            fork_list.append(fork['clone_url'])
+        index = 1
+        #last_u = response.links.get('last')
+        last = re.search('\d+$', response.links.get('last')['url'])
+        last_page = last.group(0)
+        while int(last_page) > index:
+            if (response.links.get('next')):
+                next_url = response.links.get('next')['url']
+                next_response = requests.get(next_url)
+                if (next_response.ok):
+                    for fork in next_response.json():
+                        fork_list.append(fork['clone_url'])
+                    index += 1
+                response = next_response
+    else:
+        print("Server returned status code: " + response.status_code)
+        exit()
+    return fork_list
+
 # Parse the user and repo name first
 if (not clargs.repo):
     print ("No github repository supplied. Exiting.")
@@ -111,19 +141,7 @@ else:
         print("repo_match_* error " + str(e))
     # Set up the api url to grab all forks
     github_api_forks = github_api + repo + '/forks'
-    print("link: " + github_api_forks)
-    response = requests.get(github_api_forks)
-    if response.status_code == 404:
-        print("Server returned 404. Exiting.")
-        response.raise_for_status()
-        exit()
-    elif (response.ok):
-        for fork in response.json():
-            #print("fork url: " + fork['clone_url'])
-            fork_list.append(fork['clone_url'])
-    else:
-        print("Server returned status code: " + response.status_code)
-        exit()
+    fork_list = get_forks(github_api_forks)
 
 # Start doing git commands
 if clargs.dir:
@@ -185,6 +203,7 @@ if clargs.dir:
     run(["git", "fetch", "--all"], stderr=DEVNULL, stdout=DEVNULL)
     cmd = run (["git", "log", "-1", "upstream/master", "--format=%h"], \
             capture_output=True, text=True)
+    # TODO fix repo_head. doesn't give correct hash
     repo_head = cmd.stdout.rstrip()
     # logging print("repo_head: " + repo_head)
     cmd = run(["git", "for-each-ref", \
