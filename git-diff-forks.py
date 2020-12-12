@@ -103,7 +103,6 @@ else:
             else:
                 repo_git_link = github_web + repo_user + "/" + repo_name + \
                         ".git"
-            print ('user: ' + repo_user + ", name: " + repo_name)
         else:
             print("Could not find repository address: " + clargs.repo)
             exit()
