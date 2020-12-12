@@ -53,55 +53,11 @@ cla.add_argument('-v', '--verbose', \
 #logging.basicConfig(level=args.loglevel)
 clargs = cla.parse_args()
 
-def ahead_behind(fork):
-    upstream = "upstream/master"
-    #print("ahead_behind: fork={0}".format(fork))
-    cmd = run(["git", "rev-list", "--left-right", "--count",
-        fork+".."+upstream], capture_output=True, text=True)
-    #print("cmd.stdout: {0}".format(cmd.stdout))
-    ab = re.sub(r'^(\d+)\t((\d+).*$)', r', A:\1 B:\2', cmd.stdout)
-    #print("ab: " + ab)
-    return ab.replace("\n", "")
-
-# Take the github_api_forks url and return fork_list
-# which is a list of all the fork names
-def get_forks(github_api_forks):
-    response = requests.get(github_api_forks)
-    if response.status_code == 404:
-        print("Server returned 404. Exiting.")
-        response.raise_for_status()
-        exit()
-    elif (response.ok):
-        for fork in response.json():
-            #print("fork url: " + fork['clone_url'])
-            fork_list.append(fork['clone_url'])
-        index = 1
-        #last_u = response.links.get('last')
-        last = re.search('\d+$', response.links.get('last')['url'])
-        last_page = last.group(0)
-        while int(last_page) > index:
-            if (response.links.get('next')):
-                next_url = response.links.get('next')['url']
-                next_response = requests.get(next_url)
-                if (next_response.ok):
-                    for fork in next_response.json():
-                        fork_list.append(fork['clone_url'])
-                    index += 1
-                response = next_response
-    else:
-        print("Server returned status code: " + response.status_code)
-        exit()
-    return fork_list
-
-# Parse the user and repo name first
-if (not clargs.repo):
-    print ("No github repository supplied. Exiting.")
-    exit()
-else:
+def get_repo_info(cmd_line_repo):
     # Check if shortform (user/repo) or link
-    repo_match_short = re.search('^' + regex_user_repo, clargs.repo)
-    repo_match_http = re.search(regex_http, clargs.repo)
-    repo_match_ssh = re.search(regex_ssh, clargs.repo)
+    repo_match_short = re.search('^' + regex_user_repo, cmd_line_repo)
+    repo_match_http = re.search(regex_http, cmd_line_repo)
+    repo_match_ssh = re.search(regex_ssh, cmd_line_repo)
     try:
         if (repo_match_short):
             #logging ("short: " + str(repo_match_short.group(0)))
@@ -139,6 +95,59 @@ else:
         print("repo_git_link: " + repo_git_link)
     except (AttributeError) as e:
         print("repo_match_* error " + str(e))
+    return repo, repo_user, repo_name, repo_git_link
+
+
+
+def ahead_behind(fork):
+    upstream = "upstream/master"
+    #print("ahead_behind: fork={0}".format(fork))
+    cmd = run(["git", "rev-list", "--left-right", "--count",
+        fork+".."+upstream], capture_output=True, text=True)
+    #print("cmd.stdout: {0}".format(cmd.stdout))
+    ab = re.sub(r'^(\d+)\t((\d+).*$)', r', A:\1 B:\2', cmd.stdout)
+    #print("ab: " + ab)
+    return ab.replace("\n", "")
+
+# Take the github_api_forks url and return fork_list
+# which is a list of all the fork names
+def get_forks(github_api_forks):
+    response = requests.get(github_api_forks)
+    if response.status_code == 404:
+        print("Server returned 404. Exiting.")
+        response.raise_for_status()
+        exit()
+    elif (response.ok):
+        for fork in response.json():
+            #print("fork url: " + fork['clone_url'])
+            fork_list.append(fork['clone_url'])
+        index = 1
+        if response.links.get('last'):
+            #last_u = response.links.get('last')
+            last = re.search('\d+$', response.links.get('last')['url'])
+            last_page = last.group(0)
+            while int(last_page) > index:
+                if (response.links.get('next')):
+                    next_url = response.links.get('next')['url']
+                    next_response = requests.get(next_url)
+                    if (next_response.ok):
+                        for fork in next_response.json():
+                            fork_list.append(fork['clone_url'])
+                        index += 1
+                    response = next_response
+    else:
+        print("Server returned status code: " + response.status_code)
+        exit()
+    return fork_list
+
+
+# START #
+# Parse the user and repo name first
+if (not clargs.repo):
+    print ("No github repository supplied. Exiting.")
+    exit()
+else:
+    repo, repo_user, repo_name, repo_git_link = get_repo_info(clargs.repo) 
     # Set up the api url to grab all forks
     github_api_forks = github_api + repo + '/forks'
     fork_list = get_forks(github_api_forks)
@@ -176,7 +185,7 @@ if clargs.dir:
         #logging print("Creating git remote. git remote add upstream" + repo_git_link)
         run(["git", "remote", "add", "upstream", repo_git_link], capture_output=False)
     print("Fetching upstream..")
-    run(["git", "fetch", "upstream"], stdout=DEVNULL)#, stderr=DEVNULL) 
+    run(["git", "fetch", "upstream"], capture_output=True) #, stdout=DEVNULL)#, stderr=DEVNULL) 
     # go through all forks and create remotes
     for fork_link in fork_list:
         match_fork_ur = re.search(regex_user_repo + "\.git", fork_link)
@@ -219,7 +228,6 @@ if clargs.dir:
     lines = cmd.stdout.split('\n')
     print("\n" + repo_user + " / " + repo_name + " (" + repo_head + ")")
     for line in lines:
-        #print("line: " + line)
         #print("re: " + "^(?!" + repo_head + ").*")
         match_neg_la = re.search("^(?!(" + repo_head + "))", line)
         if match_neg_la:
@@ -231,15 +239,14 @@ if clargs.dir:
                 print("  |- " + fork_name + " (" + fork_commit_head + ") " 
                         + fork_commit_date + str(ahead_behind(fork_name)))
             else:
+                # The fork has same commit as upstream
                 pass
-                #print("found fork with same commit")
         else:
             pass
     print("forks: {0}".format(len(lines)))
+    print("Any forks not shown have same commit as upstream/master")
             #print("No match_neg_la" + line)
     # git ls-remote --heads git@github.com:user/repo.git branch-name
         #  
         # https://stackoverflow.com/questions/8223906/how-to-check-if-remote-branch-exists-on-a-given-remote-repository#30524983
 
-        # run 'git for-each-ref --sort=-committerdate' and check if each fork 
-        # has same commit as repo
