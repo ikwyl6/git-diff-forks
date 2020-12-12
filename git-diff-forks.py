@@ -23,7 +23,7 @@ git_diff_cmd=["git for-each-ref --sort=-committerdate",
 ## COMMAND LINE ARGS ##
 cla = argparse.ArgumentParser(prog='git-diff-forks', \
         description='Show the diffs of all forks of a github repo project')
-cla.add_argument('-r', '--repo', \
+cla.add_argument('repo', \
         help='address or short form address of github repo')
 cla.add_argument('-d', '--dir', default='/tmp', \
         help='target dir that is used for all work')
@@ -134,6 +134,7 @@ if clargs.dir:
             pass
     # TODO try/check you can chdir to wd
     chdir(wd)
+    # Find out if this 'wd' dir already has a ,git in it
     cmd = run(["git", "rev-parse", "--is-inside-work-tree"], \
         capture_output=True, text=True)
     if not cmd.returncode == 0:
@@ -149,7 +150,7 @@ if clargs.dir:
         #logging print("Creating git remote. git remote add upstream" + repo_git_link)
         run(["git", "remote", "add", "upstream", repo_git_link], capture_output=False)
     print("Fetching upstream..")
-    run(["git", "fetch", "upstream"])#, stdout=DEVNULL, stderr=DEVNULL) 
+    run(["git", "fetch", "upstream"], stdout=DEVNULL)#, stderr=DEVNULL) 
     # go through all forks and create remotes
     for fork_link in fork_list:
         match_fork_ur = re.search(regex_user_repo + "\.git", fork_link)
@@ -161,6 +162,7 @@ if clargs.dir:
                 match_fork_ur.group(1) + "with " + \
                 regex_user_repo + "\.git")
             continue
+        # List remotes and see if remote fork is listed, if not add it
         cmd = run(["git", "remote", "-v"], capture_output=True, text=True)
         match_fork_git = re.search(remote_fork_name, cmd.stdout)
         if (match_fork_git):
@@ -204,6 +206,7 @@ if clargs.dir:
                 #print("found fork with same commit")
         else:
             pass
+    print("forks: {0}".format(len(lines)))
             #print("No match_neg_la" + line)
     # git ls-remote --heads git@github.com:user/repo.git branch-name
         #  
