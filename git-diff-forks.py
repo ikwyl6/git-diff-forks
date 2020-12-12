@@ -53,6 +53,15 @@ cla.add_argument('-v', '--verbose', \
 #logging.basicConfig(level=args.loglevel)
 clargs = cla.parse_args()
 
+def ahead_behind(fork):
+    upstream = "upstream/master"
+    #print("ahead_behind: fork={0}".format(fork))
+    cmd = run(["git", "rev-list", "--left-right", "--count",
+        fork+".."+upstream], capture_output=True, text=True)
+    #print("cmd.stdout: {0}".format(cmd.stdout))
+    ab = re.sub(r'^(\d+)\t((\d+).*$)', r', A:\1 B:\2', cmd.stdout)
+    #print("ab: " + ab)
+    return ab.replace("\n", "")
 
 # Parse the user and repo name first
 if (not clargs.repo):
@@ -173,15 +182,17 @@ if clargs.dir:
             cmd = run(["git", "remote", "add", "fork-" + remote_fork_name, \
                     fork_link], stdout=None)
         #run(["git", "fetch", "fork-" + remote_fork_name], capture_output=False)
+    # Fetch all upstream and remotes/forks
     run(["git", "fetch", "--all"], stderr=DEVNULL, stdout=DEVNULL)
     cmd = run (["git", "log", "-1", "upstream/master", "--format=%h"], \
             capture_output=True, text=True)
     repo_head = cmd.stdout.rstrip()
     # logging print("repo_head: " + repo_head)
     cmd = run(["git", "for-each-ref", \
-        # "--sort='-committerdate'" \
-          "--format=%(objectname:short) %(authordate:short) %(refname:short)", \
-          "refs/remotes/*/master"], \
+        "--sort=-committerdate", \
+        "--format=%(objectname:short) %(authordate:short) %(refname:short)", \
+        # %(upstream:trackshort)", \
+        "refs/remotes/*/master"], \
           capture_output=True, text=True)
     if not cmd.returncode == 0:
         print("Error return code from " + str(cmd.args))
@@ -199,8 +210,8 @@ if clargs.dir:
                 fork_commit_head = match_commit_info.group(1)
                 fork_commit_date = match_commit_info.group(2)
                 fork_name = match_commit_info.group(3)
-                print("  |- " + fork_name + " (" + fork_commit_head + ") " \
-                        + fork_commit_date)
+                print("  |- " + fork_name + " (" + fork_commit_head + ") " 
+                        + fork_commit_date + str(ahead_behind(fork_name)))
             else:
                 pass
                 #print("found fork with same commit")
